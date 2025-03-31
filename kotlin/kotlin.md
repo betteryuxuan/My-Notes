@@ -151,11 +151,15 @@ for (i in arr) {
     println(i)
 }
 
-for (i in 0 until 3) { // 输出 0, 1, 2
+for (i in 0 until 3) { // 0, 1, 2
     println(i)
 }
 
-for (i in 0..2) { // 输出 0, 1, 2
+for (i in 0..2) { // 0, 1, 2
+    println(i)
+}
+
+for(i in 3 downTo 1) { // 3, 2, 1
     println(i)
 }
 ```
@@ -180,8 +184,6 @@ fun twoSum(nums: IntArray, target: Int): IntArray {
     }
 }
 ```
-
-
 
 ### 常用操作
 
@@ -305,8 +307,6 @@ println(set) // 输出 [1, 2, 3]
 - **Nothing 类型**
    表示永远不会返回结果的类型，常用于函数总是抛出异常的情况。
 
-
-
 # 二、函数
 
 ## 2.1 基本函数定义
@@ -366,7 +366,6 @@ println(set) // 输出 [1, 2, 3]
   // example(a = 1, 2, 3)   // 编译错误：位置参数在具名参数后
   ```
 
-  
 
 ### 可变参数 (vararg)
 
@@ -1133,19 +1132,577 @@ println(str1.equals(str2, ignoreCase = true)) // 输出：true，忽略大小写
   }
   ```
 
-## 3. 应用场景与选择
+## 5.3 应用场景与选择
 
-- 当你需要对非空对象进行操作时，使用 `?.let { }` 能避免显式的空检查。
-- 对于对象的初始化配置，`apply` 是首选，因为它返回对象本身且代码风格简洁。
-- 如果你希望在不改变对象的情况下执行额外操作（例如日志记录），可以使用 `also`。
+- 对非空对象进行操作时，使用 `?.let { }` 能避免显式的空检查。
+- 对象的初始化配置，`apply` 是首选，因为它返回对象本身且代码风格简洁。
+- 在不改变对象的情况下执行额外操作（例如日志记录），可以使用 `also`。
 - 如果需要对一个代码块求值并返回结果，但又不关心对象本身，可使用 `run` 或 `with`（后者适用于需要多次调用同一对象的场景）。
 
+# 六、集合
+
+## 6.1 集合分类
+
+Kotlin 中的集合主要分为两大类：
+
+- **只读集合**：提供读取操作，不能修改内部元素，如：
+  - `List<T>`
+  - `Set<T>`
+  - `Map<K, V>`
+- **可变集合**：在只读集合基础上增加写操作（添加、删除、更新），如：
+  - `MutableList<T>`
+  - `MutableSet<T>`
+  - `MutableMap<K, V>`
+
+## 6.2 List 集合
+
+### 不可变 List
+
+- 创建
+
+  ```
+  listOf()
+  ```
+
+   函数创建不可变 List，例如：
+
+  ```kotlin
+  val list = listOf(1, 3, 5, 7)
+  ```
+
+- 访问元素
+
+  - 索引访问：`list[0]` 或 `list.get(0)`
+  - 获取首尾：`list.first()`、`list.last()`
+  - 安全访问：`list.elementAtOrNull(index)`（越界时返回 `null`）
+
+- 取子集
+
+  ```
+  subList(fromIndex, toIndex)
+  ```
+
+  （左闭右开区间）
+
+  ```kotlin
+  println(list.subList(0, 2))  // 输出：[1, 3]
+  ```
+
+### 可变 List
+
+- 创建
+
+  ```
+  mutableListOf()
+  ```
+
+  ```kotlin
+  val mList = mutableListOf("one", "two", "three")
+  ```
+
+- 常用操作
+
+  - 添加：`mList.add("four")`
+  - 删除：`mList.removeAt(0)` 或 `mList.remove("two")`
+  - 更新：`mList[0] = "newOne"`
+  - 随机打乱：`mList.shuffle()`
+  - 过滤删除：`mList.removeAll { it.length == 3 }`
+
+### 遍历
+
+1. **直接 for 循环遍历元素**
+   适用于只需要处理集合中每个元素的情况：
+
+```kotlin
+val list = listOf("a", "b", "c")
+for (item in list) {
+    println(item)
+}
+```
+
+2. **通过索引遍历**
+   使用 `indices` 获取索引范围，再通过索引访问对应的值：
+
+```kotlin
+for (i in list.indices) {
+    println("index = $i, value = ${list[i]}")
+}
+```
+
+3. **使用 withIndex() 进行遍历**
+   这种方式既能同时获得元素的索引和值，又让代码看起来非常清晰：
+
+```kotlin
+for ((index, value) in list.withIndex()) {
+    println("index = $index, value = $value")
+}
+```
+
+4. **使用高阶函数 forEach()**
+
+```kotlin
+list.forEach { item ->
+    println(item)
+}
+```
+
+5. **使用函数 forEachIndexed** 
+
+   允许在遍历集合的同时获取每个元素的索引和值
+
+```kotlin
+val fruits = listOf("Apple", "Banana", "Cherry")
+fruits.forEachIndexed { index, fruit ->
+    println("索引：$index，元素：$fruit")
+}
+```
+
+## 6.3 Set 集合
+
+### 基本特点
+
+- **唯一性**：Set 中的每个元素都是唯一的。
+- 创建
+  - 不可变 Set：`setOf("one", "two", "three")`
+  - 可变 Set：`mutableSetOf("one", "two", "three")`
+- **内部实现**：通常默认采用 `LinkedHashSet`，可保持插入顺序。
+
+### 常用操作
+
+- 遍历：使用 `forEach` 或 `forEachIndexed`
+
+- 集合运算：
+
+  - 并集：`set1 union set2`
+  - 交集：`set1 intersect set2`
+  - 差集：`set1 subtract set2`
+
+- **list 转 set**：
+
+  ```java
+  val list = listOf("apple", "banana", "apple", "orange")
+  // 可变或不可变
+  val set = list.toSet()
+  val mutableSet = list.toMutableSet()
+  ```
+
+  ```java
+  val list = listOf("apple", "banana", "apple", "orange")
+  val distinctList = list.distinct()
+  println(distinctList)  // [apple, banana, orange]
+  ```
+
+  ```java
+  data class Person(val name: String, val age: Int)
+  
+  val people = listOf(
+      Person("Alice", 20),
+      Person("Bob", 25),
+      Person("Alice", 30)
+  )
+  
+  // 根据 name 去重，保留第一个出现的
+  val distinctPeople = people.distinctBy { it.name }
+  println(distinctPeople)
+  // 输出：[Person(name=Alice, age=20), Person(name=Bob, age=25)]
+  ```
+
+## 6.4 Map 集合
+
+### 基本特点
+
+- **存储键值对**：键（Key）必须唯一，值（Value）可以重复。
+- 创建
+  - 不可变 Map：`mapOf("key1" to 1, "key2" to 2, "key3" to 3)`
+  - 可变 Map：`mutableMapOf("key1" to 1, "key2" to 2)`
+
+### 常用操作
+
+- 访问键和值：`map.keys`、`map.values`、`map.entries`
+
+  `getOrPut` 函数用于在映射中获取指定键的值，如果键不存在，则使用提供的默认值（通过 lambda 表达式计算）插入该键，并返回该值。
+
+- 通过键取值：`map["key1"]`
+
+- 过滤操作：
+
+  - `filter { (key, value) -> … }`
+  - `filterKeys { … }`
+  - `filterValues { … }`
+
+- Map 转换：利用 `associateWith {}`、`associateBy {}` 或 `associate {}` 将 List 转换成 Map
+
+### 遍历
+
+1. **使用 for 循环**
+
+```kotlin
+val map = mapOf("apple" to "苹果", "banana" to "香蕉")
+for ((key, value) in map) {
+    println("key = $key, value = $value")
+}
+```
+
+2. **使用 forEach 函数**
+
+```kotlin
+val map = mapOf("apple" to "苹果", "banana" to "香蕉")
+map.forEach { (key, value) ->
+    println("key = $key, value = $value")
+}
+```
+
+3. **遍历 Map 的 keys 或 values**
+
+   键或值可以分别遍历：
+
+```kotlin
+// 遍历所有键
+for (key in map.keys) {
+    println("key = $key")
+}
+
+// 遍历所有值
+for (value in map.values) {
+    println("value = $value")
+}
+```
+
+## 6.5 排序与聚合
+
+- 排序
+  - `sorted()`、`sortedDescending()`：自然顺序升序/降序排序。
+  - `sortedBy { }`、`sortedWith()`：根据指定规则排序。
+  - `reversed()`、`asReversed()`、`shuffled()`：倒序、反向视图、随机排列。
+- 聚合
+  - 数量统计：`count()`
+  - 最大最小：`maxOrNull()`、`minOrNull()`
+  - 平均、求和：`average()`、`sum()`
+  - 累加：`reduce()`、`fold()`（以及它们的右侧版本）
+
+# 七、定义类
+
+## 7.1 构造函数
+
+### 主构造函数
+
+Kotlin 的类可以有一个主构造函数和一个或多个次构造函数。主构造函数是类头的一部分，位于类名之后：
+
+```kotlin
+class Person constructor(firstName: String) {
+}
+```
+
+如果主构造函数没有任何注解或可见性修饰符，可以省略 `constructor` 关键字：
+
+```kotlin
+class Person(firstName: String) {
+}
+```
+
+示例：
+```java
+// Kotlin中的主构造函数如果不使用var或val修饰，则这些参数仅作为构造函数的形参传入，
+// 而不会自动成为类的属性。
+class Person constructor(
+    _name: String,    
+    _age: Int,       
+    _height: String  
+) {
+    // 定义name属性，并用传入的_name初始化
+    // Kotlin 中的属性有默认的 getter 和 setter，但也可以自定义
+    // 自定义getter: 每次获取name时，返回首字母大写后的字符串
+    // 自定义setter: 设置name时，先去掉前后空格再赋值
+    var name = _name
+        get() = field.capitalize()
+        set(value) {
+            field = value.trim()
+        }
+    
+    // 定义age属性，直接使用传入的_age初始化
+    var age = _age
+    
+    // 定义height属性，直接使用传入的_height初始化
+    var height = _height
+    
+    override fun toString(): String {
+        return "Person(age=$age, height='$height', name='$name')"
+    }
+}
+
+fun main() {
+    // 创建一个Person对象，传入对应的参数
+    var p1 = Person("yuxuan", 20, "175")
+    println(p1.toString())
+}
+```
+
+### 次构造函数
+
+次构造函数使用关键字 `constructor` 来声明，与主构造函数不同的是，它需要用委托调用主构造函数（或者其他次构造函数）。
+
+* 每个次构造函数必须通过委托调用其他构造函数来最终调用主构造函数（如果存在主构造函数），这确保了所有属性都能被正确初始化。
+
+例如：
+
+```kotlin
+class Person(val name: String, val age: Int) {
+    // 次构造函数，提供只传入 name 的构造方式
+    constructor(name: String) : this(name, 0) {
+        // 次构造函数体中可以进行额外的初始化操作
+        println("使用次构造函数，仅传入 name 参数")
+    }
+}
+
+fun main() {
+    val person = Person("Bob")        // 使用次构造函数
+}
+```
+
+* 次构造函数仅需要传入 `name`，然后通过 `: this(name, 0)` 委托调用主构造函数，并为 `age` 提供默认值 0。
+
+## 7.2 初始化顺序
+
+> **主构造函数参数求值 → 属性初始化与 init 块执行 → 次构造函数体执行**
+
+**1. 主构造函数的参数求值**
+
+当你创建一个对象时，首先会对传递给主构造函数的参数进行求值。
+
+**2. 属性初始化与 init 块**
+
+- 属性初始化接着会按它们在类中声明的顺序执行属性初始化语句。例如：
+- **init 块**：随后会按顺序执行所有的 `init` 块中的代码。这两个步骤一起保证了所有属性在构造过程中被正确地初始化。
+
+> 无论你使用主构造函数还是次构造函数，这一步总是会在构造函数体执行之前完成。
+
+**3. 次构造函数的调用**
+
+- 如果你是通过次构造函数来创建对象，次构造函数首先必须委托调用主构造函数（或者间接调用其他次构造函数），这样就会触发前面提到的属性初始化和 `init` 块的执行。
+- 当主构造函数、属性初始化和所有 `init` 块执行完毕后，才会执行次构造函数体中的代码。
+
+举例：
+
+```kotlin
+class Person(val name: String) {
+    var age: Int = 0
+
+    // 属性初始化
+    var info: String = "初始化属性"
+
+    // 第一个 init 块
+    init {
+        println("init 块1: name = $name")
+    }
+
+    // 第二个 init 块
+    init {
+        println("init 块2: info = $info")
+    }
+
+    // 次构造函数，委托调用主构造函数
+    constructor(name: String, age: Int) : this(name) {
+        this.age = age
+        println("次构造函数体: age = $age")
+    }
+}
+
+fun main() {
+    // 调用次构造函数创建对象
+    val p = Person("Alice", 25)
+}
+```
+
+顺序如下：
+
+1. **求值主构造函数参数**：`"Alice"` 被传入。
+2. **属性初始化**：`age` 被初始化为 0，`info` 被初始化为 `"初始化属性"`。
+3. init 块执行：按顺序打印：
+   - `init 块1: name = Alice`
+   - `init 块2: info = 初始化属性`
+4. **次构造函数体执行**：`age` 被更新为 25，并打印 `次构造函数体: age = 25`
+
+## 7.3 类的继承
+
+Kotlin 中的类默认是 `final` 的，不能被继承。如果需要一个类可以被继承，需要使用 `open` 关键字修饰：
+
+```kotlin
+open class Base(p: Int)
+
+class Derived(p: Int) : Base(p)
+```
+
+## **7.4 抽象类**
+
+抽象类使用 `abstract` 关键字修饰，不能被实例化，可以包含抽象成员：
+
+```kotlin
+abstract class Polygon {
+    abstract fun draw()
+}
+```
+
+## **7.5 类的可见性修饰符**
+
+Kotlin 提供了四个可见性修饰符：`private`、`protected`、`internal` 和 `public`。默认情况下，所有类都是 `public` 的：
+
+- `private`：仅在同一个文件中可见。
+- `protected`：同一个文件中或子类中可见。
+- `internal`：同一个模块中可见。
+- `public`：在任何地方可见。
+
+ 
 
 
-- **let**：适合对一个值进行转换、空检查，返回 lambda 结果。
-- **run**：既可以直接调用，也可作为扩展函数调用，返回最后一行表达式的结果。
-- **with**：对同一个对象进行多次操作，减少重复代码，返回最后一行表达式的结果。
-- **apply**：主要用于初始化对象，返回对象本身。
-- **also**：用于在链式调用中执行附加操作，同样返回对象本身。
-- **takeIf / takeUnless**：用于条件判断后决定是否返回对象本身，便于链式调用。
+
+## 7.6 延迟初始化
+
+###  `lazy` 委托属性
+
+- **适用场景**：通常用于 `val` 类型的属性，并且初始化操作可能较为耗时或者不一定需要立即执行。
+
+- **特点**：
+
+  - 延迟到第一次使用时执行初始化代码。
+  - 默认线程安全（可以通过传递参数修改线程安全策略）。
+  - 返回值会被缓存，下次访问时直接返回之前计算的值。
+
+- **示例代码**：
+
+  ```kotlin
+  val lazyValue: String by lazy {
+      println("初始化 lazyValue")
+      "Hello, Lazy!"
+  }
+  
+  fun main() {
+      println("调用 lazyValue 前")
+      println(lazyValue) // 第一次调用，执行初始化代码并打印 "初始化 lazyValue"
+      println(lazyValue) // 第二次调用，直接返回缓存值，不再执行 lambda
+  }
+  ```
+
+  **输出结果：**
+
+  ```
+  调用 lazyValue 前
+  初始化 lazyValue
+  Hello, Lazy!
+  Hello, Lazy!
+  ```
+
+  这里，`lazyValue` 的初始化代码只会在第一次访问时执行一次，之后直接返回缓存的值。
+
+### `lateinit` 修饰符
+
+- **适用场景**：适用于 `var` 类型的属性，通常用于那些不能在声明时就初始化的情况（例如依赖于外部注入或后续赋值），但必须保证在使用前一定被初始化。
+
+- **特点**：
+
+  - 不能用于基本数据类型（如 `Int`、`Double` 等）。
+  - 编译器不会强制在声明时初始化，但在访问时如果没有初始化会抛出 `UninitializedPropertyAccessException`。
+
+- **示例代码**：
+
+  ```kotlin
+  class Example {
+      lateinit var data: String
+  
+      fun initData() {
+          data = "Hello, Lateinit!"
+      }
+  
+      fun printData() {
+          if (::data.isInitialized) {  // 检查是否已初始化
+              println(data)
+          } else {
+              println("data 还未初始化")
+          }
+      }
+  }
+  
+  fun main() {
+      val example = Example()
+      example.printData() // 输出 "data 还未初始化"
+      example.initData()
+      example.printData() // 输出 "Hello, Lateinit!"
+  }
+  ```
+
+  在这个例子中，`data` 属性使用 `lateinit` 修饰，表示稍后会被初始化，并且在使用前可以通过 `::data.isInitialized` 检查其是否已赋值。
+
+# 八、对象
+
+## 8.1 `open` 关键字的用途
+1. **允许类被继承** 
+   Kotlin 中**类默认是 `final` 的**，需显式添加 `open` 才能被继承。  
+   
+   ```kotlin
+   open class Animal { /* 父类 */ }
+   class Dog : Animal() { /* 子类 */ }
+   ```
+   
+2. **允许方法被重写** 
+   父类方法默认不可重写，需添加 `open`，子类通过 `override` 重写。  
+   
+   ```kotlin
+   open class Animal {
+       open fun speak() { println("Animal sound") }
+   }
+   class Dog : Animal() {
+       override fun speak() { println("Bark") }
+   }
+   ```
+   
+3. **允许属性被重写** 
+   父类属性需用 `open` 修饰，子类通过 `override` 重写属性或自定义存取器。  
+   
+   ```kotlin
+   open class Person(open val name: String)
+   class Student(override val name: String) : Person(name)
+   ```
+
+## 8.2 继承中的构造函数规则
+1. **主构造函数继承** 
+   子类主构造函数需直接调用父类构造函数，父类参数若需被覆盖也需 `open`。  
+   
+   ```kotlin
+   open class Person(open val name: String)
+   class Student(name: String, val grade: Int) : Person(name)
+   ```
+   
+2. **次构造函数继承** 
+   若子类无主构造函数，次构造函数需通过 `super` 调用父类构造器。  
+   
+   ```kotlin
+   class Student : Person {
+       constructor(name: String) : super(name)
+   }
+   ```
+
+## 8.3 `init` 代码块与初始化顺序
+• **初始化顺序**：父类 `init` 代码块和属性初始化优先于子类。  
+  ```kotlin
+  open class Animal {
+      init { println("Animal initialized") }
+  }
+  class Dog : Animal() {
+      init { println("Dog initialized") }
+  }
+  // 输出顺序：Animal → Dog
+  ```
+
+---
+
+## 8.4 接口与 `open` 的关联
+• **接口方法默认开放**：接口方法无需 `open`，但实现类必须重写（除非接口提供默认实现）。  
+  ```kotlin
+  interface Speakable {
+      fun speak()  // 必须重写
+      fun eat() { println("Eating") }  // 可选重写
+  }
+  class Cat : Speakable {
+      override fun speak() { println("Meow") }
+  }
+  ```
 
